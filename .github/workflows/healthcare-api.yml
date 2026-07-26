@@ -24,8 +24,9 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Validate Python Syntax
-  run: |
-    python -m py_compile backend/app.py
-       - name: Build Docker Image
-  run: |
-    docker build -t healthcare-api:${GITHUB_SHA} ./backend   
+        run: |
+          python -m py_compile backend/app.py
+
+      - name: Build Docker Image
+        run: |
+          docker build -t healthcare-api:${{ github.sha }} ./backend
