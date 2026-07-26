@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS patients (
     email VARCHAR(100) UNIQUE,
     age INT,
     insurance_provider VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
 );
 """
 
@@ -91,7 +92,7 @@ def add_patient():
 
 @app.route("/api/patients", methods=["GET"])
 def get_patients():
-    cursor.execute("SELECT * FROM patients ORDER BY patient_id;")
+    cursor.execute("SELECT * FROM patients WHERE is_active = TRUE ORDER BY patient_id;")
     patients = cursor.fetchall()
 
     return {"patients": patients}, 200
@@ -100,7 +101,7 @@ def get_patients():
 @app.route("/api/patients/<int:patient_id>", methods=["GET"])
 def get_patient(patient_id):
     cursor.execute(
-        "SELECT * FROM patients WHERE patient_id = %s;",
+        "SELECT * FROM patients WHERE patient_id = %s AND is_active = TRUE;",
         (patient_id,)
     )
     patient = cursor.fetchone()
@@ -135,7 +136,7 @@ def update_patient(patient_id):
         return {"error": "No valid fields to update"}, 400
     
     cursor.execute(
-        "SELECT * FROM patients WHERE patient_id = %s;",
+        "SELECT * FROM patients WHERE patient_id = %s AND is_active = TRUE;",
         (patient_id,)
     )
     patient = cursor.fetchone()
@@ -153,8 +154,8 @@ def update_patient(patient_id):
 
     try:
         cursor.execute(
-            f"UPDATE patients SET {set_clause} WHERE patient_id = %s RETURNING *;",
-            values
+            f"UPDATE patients SET {set_clause} WHERE patient_id = %s AND is_active = TRUE RETURNING *;",
+            tuple(values)
         )
 
         updated_patient = cursor.fetchone()
@@ -168,5 +169,33 @@ def update_patient(patient_id):
         "message": "Patient updated successfully",
         "patient": updated_patient
     }, 200
+@app.route("/api/patients/<int:patient_id>", methods=["DELETE"])
+def delete_patient(patient_id):
+    cursor.execute(
+        "SELECT * FROM patients WHERE patient_id = %s AND is_active = TRUE;",
+        (patient_id,)
+    )
+    patient = cursor.fetchone()
+
+    if not patient:
+        return {"error": "Patient not found"}, 404
+
+    cursor.execute(
+        "UPDATE patients SET is_active = FALSE WHERE patient_id = %s AND is_active = TRUE RETURNING *;",
+        (patient_id,)
+    )
+    deactivated_patient = cursor.fetchone()
+    connection.commit()
+
+    return {
+        "message": "Patient deactivated successfully",
+        "patient": deactivated_patient
+    }, 200
+@app.route("/routes")
+def routes():
+    return {
+        "routes": [str(rule) + " " + ",".join(rule.methods) for rule in app.url_map.iter_rules()]
+    }
+print(app.url_map)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000) 

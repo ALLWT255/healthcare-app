@@ -10,16 +10,27 @@ services:
 
   backend:
     build: ./backend
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5000:5000"
     depends_on:
-      - database
+      database:
+        condition: service_healthy
 
   database:
-    image: postgres:15
+    image: postgres:13
     environment:
-      POSTGRES_DB: healthcare
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
