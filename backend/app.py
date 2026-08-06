@@ -1,15 +1,17 @@
+import os
 from flask import Flask, request
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from psycopg2 import IntegrityError
-
+from secrets import get_db_credentials
+credentials = get_db_credentials()
 app = Flask(__name__)
 
 connection = psycopg2.connect(
-    host="database",
-    database="healthcare",
-    user="admin",
-    password="password123",
+    host=os.getenv("DB_HOST"),
+    database=os.getenv("DB_NAME"),
+    user=credentials["username"],
+    password=credentials["password"],
     cursor_factory=RealDictCursor
 )
 
