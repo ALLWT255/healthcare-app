@@ -30,3 +30,11 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build -t healthcare-api:${{ github.sha }} ./backend
+
+      - name: Log in to Amazon ECR
+        run: |
+          echo "This is where GitHub Actions would authenticate to Amazon ECR."
+
+      - name: Push Docker Image to Amazon ECR
+        run: |
+          echo "This is where the Docker image would be pushed to Amazon ECR."
