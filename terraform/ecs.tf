@@ -16,7 +16,7 @@ resource "aws_ecs_task_definition" "healthcare_task" {
   memory = "512"
 
   execution_role_arn = aws_iam_role.ecs_execution_role.arn
-
+  task_role_arn      = aws_iam_role.ecs_task_role.arn
   container_definitions = jsonencode([
     {
       name  = "healthcare-api"
@@ -63,7 +63,7 @@ resource "aws_ecs_service" "healthcare_service" {
 
   network_configuration {
     subnets          = var.private_subnet_ids
-    security_groups  = [var.ecs_security_group_id]
+    security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = false
   }
 
