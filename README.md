@@ -29,7 +29,7 @@ Instead of simply deploying an application, the infrastructure was designed arou
 ---
 
 ## 🏗️ Project Architecture
-healthcare-aws-architecture.png
+![Healthcare AWS Architecture](images/health-app%20archuitre%20diagram.png)
 
 ### Request Flow
 
